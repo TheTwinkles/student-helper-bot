@@ -2,6 +2,7 @@ import requests
 import filecmp
 import os
 import PyPDF2
+import shutil
 
 from urllib.parse import urlencode
 
@@ -14,8 +15,8 @@ def parse_mod_date(filename, separator=None):
     :return: форматированная дата модификации файла
     """
     with open(filename, "rb") as pdf:
-        pdf_reader = PyPDF2.PdfFileReader(pdf)
-        mod_date = pdf_reader.documentInfo["/ModDate"]
+        pdf_reader = PyPDF2.PdfFileReader(pdf)  # "скармливаем PdfFileReader наш PDF файл
+        mod_date = pdf_reader.documentInfo["/ModDate"]  # вытаскиваем из метаданных файла дату последнего изменения
         # урезаем лишнюю информацию из mod_date
         mod_date = mod_date[2:]
         mod_date = mod_date[:14]
@@ -27,8 +28,11 @@ def parse_mod_date(filename, separator=None):
         hour = mod_date[8:10]
         minutes = mod_date[10:12]
         seconds = mod_date[12:14]
-        if separator == None:
-            parsed_mod_date = f"{date}.{month}.{year} {hour}:{minutes}:{seconds}"
+        # если не предполагается использование сепаратора то сохраняем дату последнего изменения по стандартному шаблону
+        if separator is None:
+            parsed_mod_date = f"{date}/{month}/{year} {hour}:{minutes}:{seconds}"
+        # если необходимо использовать конкретный сепаратор, то сохраняем дату последнего изменения
+        # с разделением данных с данным сепаратором
         else:
             parsed_mod_date = f"{date}{separator}{month}{separator}{year}{separator}" \
                               f"{hour}{separator}{minutes}{separator}{seconds}"
@@ -70,11 +74,10 @@ def check_rating_updates(bot, message):
                                           f"\nСсылка на файл {public_key}")
         # создаем папку для архива старых файлов с рейтингов и перемещаем туда файл,
         # который после проверки считается устаревшим
-        # TODO Пофиксить баг с ошибкой при перемещении файла в архив
         if os.path.isdir('rating_archive'):
-            os.rename('oppr_old.pdf', f'/rating_archive/oppr_old_{parse_mod_date("oppr_old.pdf", "_")}.pdf')
+            shutil.move('oppr_old.pdf', f'rating_archive/oppr_old_{parse_mod_date("oppr_old.pdf", "_")}.pdf')
             os.rename('oppr_new.pdf', 'oppr_old.pdf')
         else:
             os.mkdir('rating_archive')
-            os.rename('oppr_old.pdf', f'/rating_archive/oppr_old_{parse_mod_date("oppr_old.pdf", "_")}')
+            shutil.move('oppr_old.pdf', f'rating_archive/oppr_old_{parse_mod_date("oppr_old.pdf", "_")}')
             os.rename('oppr_new.pdf', 'oppr_old.pdf')

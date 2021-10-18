@@ -2,6 +2,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
+# Не добавляем в коммиты PDF с данными по рейтингу Гаряева
+rating_archive/
+*.pdf
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
