@@ -21,11 +21,12 @@ def main():
 
     # запуск бота
     telegram_bot(token, logger)
-    logger.info('Program started')
 
 
 def telegram_bot(token, logger):
     bot = telebot.TeleBot(token)
+
+    logger.info('Bot started')
 
     @bot.message_handler(commands=["start"])
     def start_message(message):

@@ -7,6 +7,7 @@ import logging
 
 from urllib.parse import urlencode
 
+
 # module_logger = logging.getLogger('Bot.rating_check')
 
 
@@ -60,39 +61,40 @@ def check_rating_updates(bot, message):
 
     download_response = requests.get(download_url)  # записываем содержимое файла с диска
 
-    # TODO подумать над созданием отдельной папки для работы модуля проверки обновления рейтинга
-    # if not os.path.isdir('rating_data'):
-    #     os.mkdir('rating_data')
-    #     data_path = 'rating_data'
+    data_path = 'rating_data/'
+    if not os.path.isdir('rating_data'):
+        os.mkdir('rating_data')
 
-    with open('oppr_new.pdf', "wb") as downloaded_file:
+    with open(data_path+'oppr_new.pdf', "wb") as downloaded_file:
         downloaded_file.write(download_response.content)  # сохраняем в файл содержимое файла с диска
         logger.info("Downloaded file from Yandex.Disk")
 
-    if filecmp.cmp('oppr_new.pdf', 'oppr_old.pdf', shallow=True):  # сравниваем содержимое файлов - старого и нового
+    if filecmp.cmp(data_path+'oppr_new.pdf', data_path+'oppr_old.pdf', shallow=True):  # сравниваем содержимое файлов
         # если изменений нет, то пишем сообщение пользователю с датой последнего изменения и ссылкой на файл
-        bot.send_message(message.chat.id, f"Нет изменений с {parse_mod_date('oppr_old.pdf')} "
-                                                 f"\nСсылка на файл {public_key}")
+        bot.send_message(message.chat.id, f"Нет изменений с {parse_mod_date(data_path+'oppr_old.pdf')} "
+                                          f"\nСсылка на файл {public_key}")
         logger.info("Bot sent <no changes> reply")
     else:
         # если изменения есть, то пишем сообщение пользователю с датой изменения старого файла и нового + ссылка на файл
-        bot.send_message(message.chat.id, f"Есть изменения c {parse_mod_date('oppr_old.pdf')}, "
-                                          f"изменения внесены {parse_mod_date('oppr_new.pdf')} "
+        bot.send_message(message.chat.id, f"Есть изменения c {parse_mod_date(data_path+'oppr_old.pdf')}, "
+                                          f"изменения внесены {parse_mod_date(data_path+'oppr_new.pdf')} "
                                           f"\nСсылка на файл {public_key}")
         logger.info("Bot sent <changes> reply")
 
         # создаем папку для архива старых файлов с рейтингов и перемещаем туда файл,
         # который после проверки считается устаревшим
         if os.path.isdir('rating_archive'):
-            logger.info("oppr_old.pdf archieved in rating_archive")
-            shutil.move('oppr_old.pdf', f'rating_archive/oppr_old_{parse_mod_date("oppr_old.pdf", "_")}.pdf')
+            shutil.move(data_path+'oppr_old.pdf',
+                        f'rating_archive/oppr_old_{parse_mod_date(data_path+"oppr_old.pdf", "_")}.pdf')
+            logger.info("oppr_old.pdf archived in rating_archive")
+            os.rename(data_path+'oppr_new.pdf', data_path+'oppr_old.pdf')
             logger.info("New file renamed as old")
-            os.rename('oppr_new.pdf', 'oppr_old.pdf')
         else:
             logger.warning("Missing rating_archive directory")
             os.mkdir('rating_archive')
             logger.info("rating_archive directory created")
-            logger.info("oppr_old.pdf archieved in rating_archive")
-            shutil.move('oppr_old.pdf', f'rating_archive/oppr_old_{parse_mod_date("oppr_old.pdf", "_")}')
+            shutil.move(data_path+'oppr_old.pdf',
+                        f'rating_archive/oppr_old_{parse_mod_date(data_path+"oppr_old.pdf", "_")}')
+            logger.info("oppr_old.pdf archived in rating_archive")
+            os.rename(data_path+'oppr_new.pdf', data_path+'oppr_old.pdf')
             logger.info("New file renamed as old")
-            os.rename('oppr_new.pdf', 'oppr_old.pdf')
