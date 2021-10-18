@@ -2,6 +2,7 @@ import telebot
 import rating_check
 import logging
 
+from telebot import types
 from auth_data import token
 
 
@@ -31,6 +32,25 @@ def telegram_bot(token, logger):
         bot.send_message(message.chat.id, "Привет")
         logger.info('Bot sent start message')
 
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        rating_btn = types.KeyboardButton('Рейтинг Гаряева')
+        markup.add(rating_btn)
+        bot.send_message(message.chat.id, "Выберите команду: ", reply_markup=markup)
+        logger.info('Command keyboard created')
+
+    @bot.message_handler(commands=["check_rating"])
+    def check_rating(message):
+        try:
+            logger.info('Bot received check rating updates command')
+            rating_check.check_rating_updates(bot, message)
+        except Exception as ex:
+            logger.error(ex)
+            print(ex)
+            bot.send_message(
+                message.chat.id,
+                "Ошибка"
+            )
+
     @bot.message_handler(content_types=["text"])
     def send_reply(message):
         logger.info('Bot received message')
@@ -46,10 +66,12 @@ def telegram_bot(token, logger):
                     "Ошибка"
                 )
 
+    #bot.infinity_polling()
     bot.polling()
 
-# TODO логгирование
 # TODO клавиатура
+# TODO расписание
+# TODO рейтинг по фамилии
 
 
 if __name__ == '__main__':

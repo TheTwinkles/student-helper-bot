@@ -73,13 +73,13 @@ def check_rating_updates(bot, message):
         # если изменений нет, то пишем сообщение пользователю с датой последнего изменения и ссылкой на файл
         bot.send_message(message.chat.id, f"Нет изменений с {parse_mod_date('oppr_old.pdf')} "
                                                  f"\nСсылка на файл {public_key}")
-        logger.info("Bot sent no changes reply")
+        logger.info("Bot sent <no changes> reply")
     else:
         # если изменения есть, то пишем сообщение пользователю с датой изменения старого файла и нового + ссылка на файл
         bot.send_message(message.chat.id, f"Есть изменения c {parse_mod_date('oppr_old.pdf')}, "
                                           f"изменения внесены {parse_mod_date('oppr_new.pdf')} "
                                           f"\nСсылка на файл {public_key}")
-        logger.info("Bot sent changes reply")
+        logger.info("Bot sent <changes> reply")
 
         # создаем папку для архива старых файлов с рейтингов и перемещаем туда файл,
         # который после проверки считается устаревшим
