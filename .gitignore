@@ -3,6 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 # Не добавляем в коммиты PDF с данными по рейтингу Гаряева
+rating_data/
 rating_archive/
 *.pdf
 

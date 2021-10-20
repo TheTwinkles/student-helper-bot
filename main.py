@@ -23,6 +23,14 @@ def main():
     telegram_bot(token, logger)
 
 
+def create_keyboard(bot, message, logger):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    rating_btn = types.KeyboardButton('Рейтинг Гаряева')
+    markup.add(rating_btn)
+    bot.send_message(message.chat.id, "Выберите команду: ", reply_markup=markup)
+    logger.info('Command keyboard created')
+
+
 def telegram_bot(token, logger):
     bot = telebot.TeleBot(token)
 
@@ -32,12 +40,7 @@ def telegram_bot(token, logger):
     def start_message(message):
         bot.send_message(message.chat.id, "Привет")
         logger.info('Bot sent start message')
-
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        rating_btn = types.KeyboardButton('Рейтинг Гаряева')
-        markup.add(rating_btn)
-        bot.send_message(message.chat.id, "Выберите команду: ", reply_markup=markup)
-        logger.info('Command keyboard created')
+        create_keyboard(bot, message, logger)
 
     @bot.message_handler(commands=["check_rating"])
     def check_rating(message):
@@ -70,9 +73,10 @@ def telegram_bot(token, logger):
     #bot.infinity_polling()
     bot.polling()
 
-# TODO клавиатура
-# TODO расписание
+# TODO клавиатура -> V
 # TODO рейтинг по фамилии
+# TODO расписание
+# TODO расписание для военки
 
 
 if __name__ == '__main__':
