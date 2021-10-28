@@ -4,7 +4,6 @@ import os
 import PyPDF2
 import shutil
 import logging
-import tabula
 
 from urllib.parse import urlencode
 
@@ -55,7 +54,7 @@ def check_rating_updates(bot, message):
     base_url = 'https://cloud-api.yandex.net/v1/disk/public/resources/download?'  # URL для загрузки с Я.Диска
     public_key = 'https://disk.yandex.ru/i/n1KicdZ1pObPIg'  # ссылка на конкретный файл
 
-    final_url = base_url + urlencode(dict(public_key=public_key))  # создаем ссылку на по которой отправим get-запрос
+    final_url = base_url + urlencode(dict(public_key=public_key))  # создаем ссылку по которой отправим get-запрос
     response = requests.get(final_url)  # посылаем get-запрос
     download_url = response.json()['href']  # получаем загрузочную ссылку
 
@@ -80,7 +79,7 @@ def check_rating_updates(bot, message):
     #                                       f"изменения внесены {parse_mod_date(data_path+'oppr_new.pdf')} "
     #                                       f"\nСсылка на файл {public_key}")
     #     logger.info("Bot sent <changes> reply")
-    bot.send_message(message.chat.id, f"Последнее изменение рейтинга {parse_mod_date(data_path+'oppr_new.pdf')}"
+    bot.send_message(message.chat.id, f"Последнее изменение рейтинга: {parse_mod_date(data_path+'oppr_new.pdf')}"
                                       f"\nСсылка на файл {public_key}")
     logger.info("Bot sent <changes> reply")
 

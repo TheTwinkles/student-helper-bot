@@ -2,10 +2,13 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
-# Не добавляем в коммиты PDF с данными по рейтингу Гаряева
+# Фигня для работы бота
 rating_data/
 rating_archive/
+schedule_data/
 *.pdf
+.idea/
+auth_data.py
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
