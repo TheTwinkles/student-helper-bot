@@ -42,11 +42,12 @@ def parse_mod_date(filename, separator=None):
     return parsed_mod_date
 
 
-def check_rating_updates(bot, message):
+def check_rating_updates(bot, chat_id, auto_check=False):
     """
     Функция для проверки обновления в рейтинговой таблице Гаряева
+    :param auto_check: переменная для определения автоматической проверки
     :param bot: объект бота от которого отправляется сообщение
-    :param message: объект сообщения пользователя
+    :param chat_id: объект сообщения пользователя
     :return:
     """
     logger = logging.getLogger("Bot.rating_check.check_rating_updates")
@@ -62,26 +63,30 @@ def check_rating_updates(bot, message):
 
     data_path = 'rating_data/'
     if not os.path.isdir('rating_data'):
+        logger.warning("Missing rating data directory")
         os.mkdir('rating_data')
 
     with open(data_path+'oppr_new.pdf', "wb") as downloaded_file:
         downloaded_file.write(download_response.content)  # сохраняем в файл содержимое файла с диска
         logger.info("Downloaded file from Yandex.Disk")
 
-    # if filecmp.cmp(data_path+'oppr_new.pdf', data_path+'oppr_old.pdf', shallow=True):  # сравниваем содержимое файлов
-    #     # если изменений нет, то пишем сообщение пользователю с датой последнего изменения и ссылкой на файл
-    #     bot.send_message(message.chat.id, f"Нет изменений с {parse_mod_date(data_path+'oppr_old.pdf')} "
-    #                                       f"\nСсылка на файл {public_key}")
-    #     logger.info("Bot sent <no changes> reply")
-    # else:
-    #     # если изменения есть, то пишем сообщение пользователю с датой изменения старого файла и нового + ссылка на файл
-    #     bot.send_message(message.chat.id, f"Есть изменения c {parse_mod_date(data_path+'oppr_old.pdf')}, "
-    #                                       f"изменения внесены {parse_mod_date(data_path+'oppr_new.pdf')} "
-    #                                       f"\nСсылка на файл {public_key}")
-    #     logger.info("Bot sent <changes> reply")
-    bot.send_message(message.chat.id, f"Последнее изменение рейтинга: {parse_mod_date(data_path+'oppr_new.pdf')}"
-                                      f"\nСсылка на файл {public_key}")
-    logger.info("Bot sent <changes> reply")
+    if auto_check:
+        logger.info("Autocheck")
+        if filecmp.cmp(data_path+'oppr_new.pdf', data_path+'oppr_old.pdf', shallow=True):  # сравниваем содержимое файлов
+            # если изменений нет, то пишем сообщение пользователю с датой последнего изменения и ссылкой на файл
+            # bot.send_message(message.chat.id, f"Нет изменений в рейтинге с {parse_mod_date(data_path+'oppr_old.pdf')} "
+            #                                   f"\nСсылка на файл {public_key}")
+            logger.info("<no changes> in rating")
+        else:
+            # если изменения есть, то пишем сообщение пользователю с датой изменения старого файла и нового + ссылка на файл
+            bot.send_message(chat_id, f"Есть изменения в рейтинге c {parse_mod_date(data_path+'oppr_old.pdf')}, "
+                                              f"изменения внесены {parse_mod_date(data_path+'oppr_new.pdf')} "
+                                              f"\nСсылка на файл {public_key}")
+            logger.info("Bot sent <changes> reply")
+    else:
+        bot.send_message(chat_id, f"Последнее изменение рейтинга: {parse_mod_date(data_path+'oppr_new.pdf')}"
+                                          f"\nСсылка на файл {public_key}")
+        logger.info("Bot sent <last changes> reply")
 
     # создаем папку для архива старых файлов с рейтингов и перемещаем туда файл,
     # который после проверки считается устаревшим
